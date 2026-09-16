@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = 'HS256'
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    FRONTEND_URL: str = 'http://localhost:5173'
+    FRONTEND_URL: str = 'https://inventell-rth.vercel.app'
 
     # ---- Store Monitor person-only detection ----
     # COCO PERSON class id; only this class may ever reach the tracker.
