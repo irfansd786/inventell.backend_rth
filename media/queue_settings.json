@@ -1,0 +1,9 @@
+{
+  "threshold_normal_max": 3,
+  "threshold_moderate_max": 6,
+  "threshold_high_max": 10,
+  "alert_threshold": 3,
+  "critical_threshold": 11,
+  "long_wait_seconds": 240,
+  "dwell_waiting_seconds": 2.0
+}

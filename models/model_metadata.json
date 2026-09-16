@@ -1,0 +1,39 @@
+{
+  "model_name": "LightGBM Retail Demand Forecast",
+  "model_version": "1.0.0",
+  "training_date": "2026-09-15T15:56:02.994351+00:00",
+  "dataset_source": "M5 Forecasting \u2013 Accuracy (Walmart Retail Sales)",
+  "train_samples": 463500,
+  "val_samples": 42000,
+  "time_split_cutoff_day": 1913,
+  "features": [
+    "dept_id",
+    "wday",
+    "month",
+    "year",
+    "is_weekend",
+    "has_event",
+    "snap_CA",
+    "snap_TX",
+    "snap_WI",
+    "lag_1",
+    "lag_7",
+    "lag_14",
+    "lag_28",
+    "rolling_7",
+    "rolling_14",
+    "rolling_28",
+    "sell_price",
+    "price_diff"
+  ],
+  "metrics": {
+    "mae": 0.9539,
+    "rmse": 2.0995,
+    "wmape_pct": 73.48
+  },
+  "hyperparameters": {
+    "n_estimators": 250,
+    "learning_rate": 0.05,
+    "num_leaves": 31
+  }
+}

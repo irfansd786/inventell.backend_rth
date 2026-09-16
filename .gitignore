@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+invintell_dev.db
+*.db
+# Large testing CCTV videos are served from disk, never committed.
+media/test_videos/*.mp4
+media/test_videos/*.avi
+media/test_videos/*.mov
+media/test_videos/*.webm
+!media/test_videos/.gitkeep
