@@ -41,23 +41,47 @@ def _migrate_users_table():
     """Ensure newly added columns exist in users table on local SQLite."""
     try:
         with engine.connect() as conn:
-            res = conn.execute(text("PRAGMA table_info(users)")).fetchall()
-            if res:
-                col_names = {row[1] for row in res}
-                if 'firebase_uid' not in col_names:
-                    conn.execute(text("ALTER TABLE users ADD COLUMN firebase_uid VARCHAR(128)"))
-                if 'status' not in col_names:
-                    conn.execute(text("ALTER TABLE users ADD COLUMN status VARCHAR(20) DEFAULT 'active'"))
-                if 'assigned_modules' not in col_names:
-                    conn.execute(text("ALTER TABLE users ADD COLUMN assigned_modules TEXT DEFAULT '[]'"))
-                if 'last_login' not in col_names:
-                    conn.execute(text("ALTER TABLE users ADD COLUMN last_login TIMESTAMP"))
-                conn.commit()
+            if engine.dialect.name == 'sqlite':
+                res = conn.execute(text("PRAGMA table_info(users)")).fetchall()
+                if res:
+                    col_names = {row[1] for row in res}
+                    if 'firebase_uid' not in col_names:
+                        conn.execute(text("ALTER TABLE users ADD COLUMN firebase_uid VARCHAR(128)"))
+                    if 'status' not in col_names:
+                        conn.execute(text("ALTER TABLE users ADD COLUMN status VARCHAR(20) DEFAULT 'active'"))
+                    if 'assigned_modules' not in col_names:
+                        conn.execute(text("ALTER TABLE users ADD COLUMN assigned_modules TEXT DEFAULT '[]'"))
+                    if 'last_login' not in col_names:
+                        conn.execute(text("ALTER TABLE users ADD COLUMN last_login TIMESTAMP"))
+                    conn.commit()
     except Exception:
         pass
 
 
-_migrate_users_table()
+def init_db():
+    """Ensure database schema exists and seed initial demo data if empty."""
+    try:
+        from app.models import (  # noqa: F401
+            activity_log, alert, customer, inventory, order,
+            order_item, product, risk, sale, supplier, transfer, user, warehouse
+        )
+        Base.metadata.create_all(bind=engine)
+        _migrate_users_table()
+
+        db = SessionLocal()
+        try:
+            from app.models.user import User
+            if db.query(User).count() == 0:
+                print('[INVINTELL] Database is empty. Seeding initial data...')
+                from app.utils.seed import seed
+                seed()
+        finally:
+            db.close()
+    except Exception as exc:
+        print(f'[INVINTELL] Database auto-init note: {exc}')
+
+
+init_db()
 
 
 def get_db():
@@ -66,3 +90,4 @@ def get_db():
         yield db
     finally:
         db.close()
+
