@@ -11,6 +11,28 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     FRONTEND_URL: str = 'https://inventell-rth.vercel.app'
 
+    @property
+    def cors_origins(self) -> list[str]:
+        origins = set()
+        if self.FRONTEND_URL:
+            for item in self.FRONTEND_URL.split(','):
+                cleaned = item.strip().rstrip('/')
+                if cleaned:
+                    origins.add(cleaned)
+        default_origins = [
+            'https://inventell-rth.vercel.app',
+            'http://localhost:5173',
+            'http://127.0.0.1:5173',
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://localhost:8000',
+            'http://127.0.0.1:8000',
+        ]
+        for orig in default_origins:
+            origins.add(orig.rstrip('/'))
+        return list(origins)
+
+
     # ---- Store Monitor person-only detection ----
     # COCO PERSON class id; only this class may ever reach the tracker.
     PERSON_CLASS_ID: int = 0
