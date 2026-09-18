@@ -12,12 +12,20 @@ DB_PATH = Path(__file__).resolve().parent.parent.parent / "invintell_dev.db"
 
 def _create_engine():
     url = settings.DATABASE_URL
+    if url.startswith('postgres://'):
+        url = url.replace('postgres://', 'postgresql://', 1)
+
     if url.startswith('sqlite'):
         return create_engine(url, connect_args={'check_same_thread': False}, pool_pre_ping=True)
+
     try:
-        return create_engine(url, pool_pre_ping=True)
-    except ModuleNotFoundError as exc:
-        print(f'[INVINTELL] WARNING: {exc}. Falling back to local SQLite dev database at {DB_PATH}.')
+        eng = create_engine(url, pool_pre_ping=True)
+        # Verify database connection works (handles unreachable localhost or invalid credentials)
+        with eng.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return eng
+    except Exception as exc:
+        print(f'[INVINTELL] WARNING: Database connection failed ({exc}). Falling back to local SQLite dev database at {DB_PATH}.')
         return create_engine(
             f'sqlite:///{DB_PATH}',
             connect_args={'check_same_thread': False},
