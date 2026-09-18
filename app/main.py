@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from app.core.config import settings
 from app.routers import (
@@ -36,6 +37,7 @@ from app.routers.fulfillment import (
 
 app = FastAPI(title='INVINTELL Retail Intelligence API', version='1.0.0')
 
+app.add_middleware(GZipMiddleware, minimum_size=500)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,

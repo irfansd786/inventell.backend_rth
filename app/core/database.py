@@ -19,7 +19,8 @@ def _create_engine():
         return create_engine(url, connect_args={'check_same_thread': False}, pool_pre_ping=True)
 
     try:
-        eng = create_engine(url, pool_pre_ping=True)
+        connect_args = {'connect_timeout': 3} if 'postgresql' in url else {}
+        eng = create_engine(url, pool_pre_ping=True, connect_args=connect_args)
         # Verify database connection works (handles unreachable localhost or invalid credentials)
         with eng.connect() as conn:
             conn.execute(text("SELECT 1"))
