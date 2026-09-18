@@ -3,27 +3,29 @@ uvicorn[standard]==0.34.0
 sqlalchemy==2.0.36
 alembic==1.14.0
 psycopg2-binary==2.9.10
+
 pydantic==2.10.4
 email-validator==2.2.0
 pydantic-settings==2.7.0
 python-dotenv==1.0.1
+
 pyjwt==2.10.1
 passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 python-multipart==0.0.20
+
 pytest==8.3.4
 httpx==0.28.1
+
 opencv-python-headless==5.0.0.93
 numpy==2.5.2
-# YOLOv8 PERSON-only detection (backend/app/cv/detector.py requests
-# classes=[0] at PERSON_CONFIDENCE_THRESHOLD and re-checks every box,
-# so only COCO class 0 reaches the tracker). Verified working set:
-# torch/torchvision CPU + ultralytics below.
+
+# YOLOv8 PERSON-only detection
 torch==2.14.0
 torchvision==0.29.0
 ultralytics==8.4.142
 
 pandas==2.2.3
 scikit-learn==1.5.2
-lightgbm>=4.0.0
-firebase-admin>=6.5.0
+lightgbm==4.6.0
+firebase-admin==6.9.0
