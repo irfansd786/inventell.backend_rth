@@ -46,9 +46,14 @@ app.add_middleware(
 )
 
 
+@app.get('/')
+@app.head('/')
+@app.get('/health')
+@app.head('/health')
 @app.get('/api/health')
+@app.head('/api/health')
 def health():
-    return {'status': 'ok'}
+    return {'status': 'ok', 'service': 'INVINTELL Retail Intelligence API'}
 
 
 app.include_router(auth.router, prefix='/api')
