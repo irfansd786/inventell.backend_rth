@@ -42,6 +42,13 @@ def _video_path(camera_id: str) -> str | None:
     return None
 
 
+def _tracks_path(camera_id: str) -> str | None:
+    candidate = os.path.join(_media_dir(), f'{camera_id}.tracks.json')
+    if os.path.isfile(candidate):
+        return candidate
+    return None
+
+
 def _probe(path: str) -> dict:
     info = {'size_bytes': os.path.getsize(path)}
     try:
@@ -57,8 +64,8 @@ def _probe(path: str) -> dict:
 def _get_job(camera_id: str) -> ProcessingJob | None:
     job = _jobs.get(camera_id)
     if job is None:
-        path = _video_path(camera_id)
-        if path:
+        path = _video_path(camera_id) or os.path.join(_media_dir(), f'{camera_id}.mp4')
+        if _video_path(camera_id) or _tracks_path(camera_id):
             job = ProcessingJob(camera_id, path)
             job.start()
             _jobs[camera_id] = job
@@ -89,6 +96,17 @@ def list_videos():
             meta = _probe(path)
             meta.update({'camera_id': camera_id, 'filename': os.path.basename(path)})
             out.append(meta)
+        elif _tracks_path(camera_id):
+            out.append({
+                'camera_id': camera_id,
+                'filename': f'{camera_id}.mp4',
+                'fps': 30,
+                'width': 1920,
+                'height': 1080,
+                'duration': 60.0,
+                'size_bytes': 0,
+                'kind': 'test',
+            })
     return {'items': out}
 
 
@@ -120,9 +138,9 @@ def upload_video(
 
 @router.post('/start')
 def start_processing(payload: StartIn, _user=Depends(get_current_user)):
-    path = _video_path(payload.camera_id)
-    if not path:
-        raise HTTPException(status_code=404, detail=f'No testing video for {payload.camera_id}')
+    path = _video_path(payload.camera_id) or os.path.join(_media_dir(), f'{payload.camera_id}.mp4')
+    if not _video_path(payload.camera_id) and not _tracks_path(payload.camera_id):
+        raise HTTPException(status_code=404, detail=f'No testing video or telemetry tracks for {payload.camera_id}')
     job = _jobs.get(payload.camera_id)
     if job is None or job.video_path != path:
         job = ProcessingJob(payload.camera_id, path)
@@ -141,11 +159,11 @@ def stop_processing(payload: StartIn, _user=Depends(get_current_user)):
 @router.get('/status')
 def processing_status(camera_id: str = 'camera_01', _user=Depends(get_current_user)):
     job = _get_job(camera_id)
+    has_feed = bool(_video_path(camera_id) or _tracks_path(camera_id))
     if job is None:
-        path = _video_path(camera_id)
         return {'camera_id': camera_id, 'state': 'idle', 'progress': 0,
-                'has_video': bool(path), 'engine': 'unknown', 'error': ''}
-    return {**job.status(), 'has_video': True}
+                'has_video': has_feed, 'engine': 'unknown', 'error': ''}
+    return {**job.status(), 'has_video': has_feed}
 
 
 # ---------- intelligence queries (timestamp-synchronized) ----------
@@ -159,17 +177,30 @@ def cameras(_user=Depends(get_current_user)):
     out = []
     for camera_id in ('camera_01', 'camera_02'):
         path = _video_path(camera_id)
-        item = {'camera_id': camera_id, 'has_video': bool(path)}
+        tracks = _tracks_path(camera_id)
+        has_feed = bool(path or tracks)
+        item = {'camera_id': camera_id, 'has_video': has_feed}
         if path:
             meta = _probe(path)
             meta.update({'filename': os.path.basename(path)})
             item['video'] = meta
+        elif tracks:
+            item['video'] = {
+                'camera_id': camera_id,
+                'filename': f'{camera_id}.mp4',
+                'fps': 30,
+                'width': 1920,
+                'height': 1080,
+                'duration': 60.0,
+                'size_bytes': 0,
+                'kind': 'test',
+            }
         job = _get_job(camera_id)
         if job is None:
             item['status'] = {'camera_id': camera_id, 'state': 'idle', 'progress': 0,
-                              'has_video': bool(path), 'engine': 'unknown', 'error': ''}
+                              'has_video': has_feed, 'engine': 'unknown', 'error': ''}
         else:
-            item['status'] = {**job.status(), 'has_video': True}
+            item['status'] = {**job.status(), 'has_video': has_feed}
         out.append(item)
     return {'items': out}
 
