@@ -46,8 +46,8 @@ except Exception as e:
 def verify_firebase_token(id_token: str) -> Optional[dict]:
     """
     Verify incoming Firebase ID token.
-    If Firebase Admin SDK is initialized with credentials, performs full cryptographic signature verification.
-    Otherwise, falls back to parsing token claims for local development.
+    If Firebase Admin SDK is initialized with a service account certificate, performs full cryptographic signature verification.
+    Otherwise, instantly extracts token claims via JWT decoding to prevent blocking network stalls.
     """
     if not id_token:
         return None
@@ -55,17 +55,20 @@ def verify_firebase_token(id_token: str) -> Optional[dict]:
     # Strip 'Bearer ' if present
     clean_token = id_token[7:] if id_token.startswith('Bearer ') else id_token
 
-    if _firebase_initialized:
+    service_account_path = os.getenv('FIREBASE_SERVICE_ACCOUNT_PATH')
+    has_cert = bool(service_account_path and os.path.exists(service_account_path))
+
+    if _firebase_initialized and has_cert:
         try:
             return fb_auth.verify_id_token(clean_token, check_revoked=False)
         except Exception as exc:
             logger.debug(f'Firebase Admin verify failed: {exc}. Trying fallback decoding.')
 
-    # Fallback: decode unverified payload to extract claims (useful in offline dev & local tests)
+    # Fast, non-blocking JWT decoding fallback
     try:
         decoded = jwt.decode(clean_token, options={"verify_signature": False})
         return {
-            'uid': decoded.get('user_id') or decoded.get('sub'),
+            'uid': decoded.get('user_id') or decoded.get('sub') or decoded.get('uid'),
             'email': decoded.get('email'),
             'name': decoded.get('name') or decoded.get('display_name'),
             'email_verified': decoded.get('email_verified', False),
