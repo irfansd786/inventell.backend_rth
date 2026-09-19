@@ -63,7 +63,7 @@ uvicorn app.main:app --reload --port 8000
 
 ## 9. API documentation
 
-Interactive docs: http://localhost:8000/docs
+Interactive docs: https://inventell-backend-rth.onrender.com/docs
 
 Health check: `GET /api/health` → `{"status": "ok"}`
 
@@ -109,4 +109,4 @@ TEST VIDEO → OpenCV → person detection → tracking → foot point
   `tracks/map/metrics/events/zones?timestamp=` in sync with video playback.
 * Dots on the 2D map come only from real tracks — with no processing results
   the UI shows "Detection engine not connected" instead of simulated data.
-* Docs: `app/cv/` module + http://localhost:8000/docs (`store-monitor` tag).
+* Docs: `app/cv/` module + https://inventell-backend-rth.onrender.com/docs (`store-monitor` tag).
