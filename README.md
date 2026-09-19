@@ -72,7 +72,7 @@ Health check: `GET /api/health` → `{"status": "ok"}`
 In `frontend/.env` (see `frontend/.env.example`):
 
 ```
-VITE_API_URL= https://inventell-backend-rth.onrender.com/
+VITE_API_URL= http://127.0.0.1:8000/
 ```
 
 Then run the frontend:
