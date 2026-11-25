@@ -122,9 +122,12 @@ def get_summary(db: Session, range_key: str = '7d') -> dict:
     # Fetch real CCTV telemetry metrics if available
     try:
         from app.routers.store_monitor import _get_job
-        from app.services import store_intelligence_service as cv_svc
         cctv_job = _get_job('camera_01')
-        cctv_metrics = cv_svc.get_metrics(cctv_job, 0.0) if cctv_job else {}
+        if cctv_job:
+            from app.services import store_intelligence_service as cv_svc
+            cctv_metrics = cv_svc.get_metrics(cctv_job, 0.0)
+        else:
+            cctv_metrics = {}
     except Exception:
         cctv_metrics = {}
 
@@ -352,9 +355,12 @@ def get_store_intelligence(db: Session) -> dict:
 
     try:
         from app.routers.store_monitor import _get_job
-        from app.services import store_intelligence_service as cv_svc
         cctv_job = _get_job('camera_01')
-        cctv_metrics = cv_svc.get_metrics(cctv_job, 0.0) if cctv_job else {}
+        if cctv_job:
+            from app.services import store_intelligence_service as cv_svc
+            cctv_metrics = cv_svc.get_metrics(cctv_job, 0.0)
+        else:
+            cctv_metrics = {}
     except Exception:
         cctv_job = None
         cctv_metrics = {}

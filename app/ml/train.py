@@ -22,7 +22,7 @@ from app.ml.features import build_forecasting_features, load_raw_datasets
 
 # Paths
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-DATA_DIR = BASE_DIR / "data"
+DATA_DIR = BASE_DIR.parent / "frontend" / "data"
 MODELS_DIR = BASE_DIR / "models"
 
 

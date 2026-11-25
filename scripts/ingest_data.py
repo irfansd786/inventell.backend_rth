@@ -18,6 +18,7 @@ import numpy as np
 
 # Ensure backend directory is on sys.path
 BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR.parent / "frontend" / "data"
 sys.path.insert(0, str(BASE_DIR))
 
 from app.core.database import Base, SessionLocal, engine
@@ -38,11 +39,11 @@ from app.models.warehouse import Warehouse
 
 
 def setup_data_directories():
-    """Create backend/data/raw and backend/data/processed directories and copy raw files."""
+    """Create frontend/data/raw and frontend/data/processed directories and copy raw files."""
     root_dir = BASE_DIR.parent
-    raw_m5 = BASE_DIR / "data" / "raw" / "m5"
-    raw_retail = BASE_DIR / "data" / "raw" / "retail_inventory"
-    processed = BASE_DIR / "data" / "processed"
+    raw_m5 = DATA_DIR / "raw" / "m5"
+    raw_retail = DATA_DIR / "raw" / "retail_inventory"
+    processed = DATA_DIR / "processed"
 
     raw_m5.mkdir(parents=True, exist_ok=True)
     raw_retail.mkdir(parents=True, exist_ok=True)
@@ -675,8 +676,8 @@ def main():
 
     db = SessionLocal()
     try:
-        raw_m5 = BASE_DIR / "data" / "raw" / "m5"
-        retail_csv = BASE_DIR / "data" / "raw" / "retail_inventory" / "Retail inventory.csv"
+        raw_m5 = DATA_DIR / "raw" / "m5"
+        retail_csv = DATA_DIR / "raw" / "retail_inventory" / "Retail inventory.csv"
         
         print("\n1. Ingesting dataset provenance metadata and users...")
         ingest_provenance(db)
